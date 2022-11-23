@@ -1,4 +1,4 @@
-
+import pandas as pd
 from evaluation.evaluation import merge_ranking_true_pred
 
 
@@ -45,7 +45,6 @@ def map_at_k(
         col_item=col_item,
         col_rating=col_rating,
         col_prediction=col_prediction,
-        relevancy_method=relevancy_method,
         k=k,
         threshold=threshold,
     )

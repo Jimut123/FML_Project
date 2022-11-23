@@ -41,7 +41,6 @@ def precision_at_k(
         col_item=col_item,
         col_rating=col_rating,
         col_prediction=col_prediction,
-        relevancy_method=relevancy_method,
         k=k,
         threshold=threshold,
     )
