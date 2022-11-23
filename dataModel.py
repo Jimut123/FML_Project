@@ -4,12 +4,6 @@ import numpy as np
 import pandas as pd
 import scipy.sparse as sp
 
-from recommenders.utils.constants import (
-    DEFAULT_ITEM_COL,
-    DEFAULT_USER_COL,
-    DEFAULT_RATING_COL,
-    DEFAULT_PREDICTION_COL,
-)
 
 
 class ImplicitCF(object):
@@ -22,10 +16,10 @@ class ImplicitCF(object):
         train,
         test=None,
         adj_dir=None,
-        col_user=DEFAULT_USER_COL,
-        col_item=DEFAULT_ITEM_COL,
-        col_rating=DEFAULT_RATING_COL,
-        col_prediction=DEFAULT_PREDICTION_COL,
+        col_user="userID",
+        col_item="itemID",
+        col_rating="rating",
+        col_prediction="prediction",
         seed=None,
     ):
         """Constructor

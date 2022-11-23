@@ -34,15 +34,15 @@ class LightGCN(object):
         np.random.seed(seed)
 
         self.data = data
-        self.epochs = hparams.epochs
-        self.learning_rate = hparams.learning_rate
-        self.emb_dim = hparams.embed_size
-        self.batch_size = hparams.batch_size
-        self.n_layers = hparams.n_layers
-        self.decay = hparams.decay
-        self.eval_epoch = hparams.eval_epoch
-        self.top_k = hparams.top_k
-        self.metrics = hparams.metrics
+        self.epochs = hparams["epochs"]
+        self.learning_rate = hparams["learning_rate"]
+        self.emb_dim = hparams["embed_size"]
+        self.batch_size = hparams["batch_size"]
+        self.n_layers = hparams["n_layers"]
+        self.decay = hparams["decay"]
+        self.eval_epoch = hparams["eval_epoch"]
+        self.top_k = hparams["top_k"]
+        self.metrics = hparams["metrics"]
 
         self.n_users, self.n_items = self.data.n_users, self.data.n_items
         
@@ -301,7 +301,7 @@ class LightGCN(object):
             test_scores.append(np.array(rate_batch))
         test_scores = np.concatenate(test_scores, axis=0)
         if remove_seen:
-            test_scores += self.data.R.tocsr()[user_ids, :] * -np.inf
+            test_scores += self.data.rating_matrix.tocsr()[user_ids, :] * -np.inf
         return test_scores
 
     def recommendKItemsForallUsers(
