@@ -35,79 +35,61 @@ class LightGCN(object):
 
         self.data = data
         self.epochs = hparams.epochs
-        self.lr = hparams.learning_rate
+        self.learning_rate = hparams.learning_rate
         self.emb_dim = hparams.embed_size
         self.batch_size = hparams.batch_size
         self.n_layers = hparams.n_layers
         self.decay = hparams.decay
         self.eval_epoch = hparams.eval_epoch
         self.top_k = hparams.top_k
-        self.save_model = hparams.save_model
-        self.save_epoch = hparams.save_epoch
         self.metrics = hparams.metrics
-        self.model_dir = hparams.MODEL_DIR
 
+        self.n_users, self.n_items = self.data.n_users, self.data.n_items
         
-        # Mean average Precision
-        # NDGC 
-        # Precision
-        # Recall 
-        metric_options = ["map", "ndcg", "precision", "recall"]
-        for metric in self.metrics:
-            if metric not in metric_options:
-                raise ValueError(
-                    "Wrong metric(s), please select one of this list: {}".format(
-                        metric_options
-                    )
-                )
-
-        self.norm_adj = data.create_norm_adj_mat()
-
-        self.n_users = data.n_users
-        self.n_items = data.n_items
+        self.normalized_adjacency_matrix = data.create_norm_adj_mat()
 
         self.users = tf.compat.v1.placeholder(tf.int32, shape=(None,))
         self.pos_items = tf.compat.v1.placeholder(tf.int32, shape=(None,))
         self.neg_items = tf.compat.v1.placeholder(tf.int32, shape=(None,))
 
         self.weights = self._init_weights()
-        self.ua_embeddings, self.ia_embeddings = self._create_lightgcn_embed()
+        self.average_user_embeddings, self.average_item_embeddings = self.buildEmbeddings()
 
+        # https://stackoverflow.com/questions/34870614/what-does-tf-nn-embedding-lookup-function-do
         self.u_g_embeddings = tf.nn.embedding_lookup(
-            params=self.ua_embeddings, ids=self.users
+            params=self.average_user_embeddings, ids=self.users
         )
-        self.pos_i_g_embeddings = tf.nn.embedding_lookup(
-            params=self.ia_embeddings, ids=self.pos_items
+        self.positive_item_avg_embeddings = tf.nn.embedding_lookup(
+            params=self.average_item_embeddings, ids=self.pos_items
         )
-        self.neg_i_g_embeddings = tf.nn.embedding_lookup(
-            params=self.ia_embeddings, ids=self.neg_items
+        self.negative_item_avg_embeddings = tf.nn.embedding_lookup(
+            params=self.average_item_embeddings, ids=self.neg_items
         )
         self.u_g_embeddings_pre = tf.nn.embedding_lookup(
             params=self.weights["user_embedding"], ids=self.users
         )
-        self.pos_i_g_embeddings_pre = tf.nn.embedding_lookup(
+        self.positive_item_avg_embeddings_pre = tf.nn.embedding_lookup(
             params=self.weights["item_embedding"], ids=self.pos_items
         )
-        self.neg_i_g_embeddings_pre = tf.nn.embedding_lookup(
+        self.negative_item_avg_embeddings_pre = tf.nn.embedding_lookup(
             params=self.weights["item_embedding"], ids=self.neg_items
         )
 
         self.batch_ratings = tf.matmul(
             self.u_g_embeddings,
-            self.pos_i_g_embeddings,
+            self.positive_item_avg_embeddings,
             transpose_a=False,
             transpose_b=True,
         )
 
         self.mf_loss, self.emb_loss = self._create_bpr_loss(
-            self.u_g_embeddings, self.pos_i_g_embeddings, self.neg_i_g_embeddings
+            self.u_g_embeddings, self.positive_item_avg_embeddings, self.negative_item_avg_embeddings
         )
         self.loss = self.mf_loss + self.emb_loss
 
-        self.opt = tf.compat.v1.train.AdamOptimizer(learning_rate=self.lr).minimize(
+        self.optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(
             self.loss
         )
-        self.saver = tf.compat.v1.train.Saver(max_to_keep=1)
 
         gpu_options = tf.compat.v1.GPUOptions(allow_growth=True)
         self.sess = tf.compat.v1.Session(
@@ -134,13 +116,14 @@ class LightGCN(object):
         )
         
         return embeddings
+    
 
-    def _create_lightgcn_embed(self):
+    def buildEmbeddings(self):
         """Calculate the average embeddings of users and items after every layer of the model.
         Returns:
             tf.Tensor, tf.Tensor: Average user embeddings. Average item embeddings.
         """
-        A_hat = self._convert_sp_mat_to_sp_tensor(self.norm_adj)
+        A_hat = self.sparseMatrix_Tensor(self.normalized_adjacency_matrix)
 
         ego_embeddings = tf.concat(
             [self.weights["user_embedding"], self.weights["item_embedding"]], axis=0
@@ -169,27 +152,29 @@ class LightGCN(object):
         Returns:
             tf.Tensor, tf.Tensor: Matrix factorization loss. Embedding regularization loss.
         """
-        pos_scores = tf.reduce_sum(input_tensor=tf.multiply(users, pos_items), axis=1)
-        neg_scores = tf.reduce_sum(input_tensor=tf.multiply(users, neg_items), axis=1)
+        positive_ratings = tf.reduce_sum(input_tensor=tf.multiply(users, pos_items), axis=1)
+        negative_ratings = tf.reduce_sum(input_tensor=tf.multiply(users, neg_items), axis=1)
 
         regularizer = (
             tf.nn.l2_loss(self.u_g_embeddings_pre)
-            + tf.nn.l2_loss(self.pos_i_g_embeddings_pre)
-            + tf.nn.l2_loss(self.neg_i_g_embeddings_pre)
+            + tf.nn.l2_loss(self.positive_item_avg_embeddings_pre)
+            + tf.nn.l2_loss(self.negative_item_avg_embeddings_pre)
         )
         regularizer = regularizer / self.batch_size
-        relu_score = tf.nn.softplus(-(pos_scores - neg_scores))
+        ## why softplus activation? (relu implemented as an approximation)
+        relu_score = tf.nn.softplus(-(positive_ratings - negative_ratings))
         mf_loss = tf.reduce_mean(
             input_tensor=relu_score
         )
         emb_loss = self.decay * regularizer
         return mf_loss, emb_loss
 
-    def _convert_sp_mat_to_sp_tensor(self, X):
+    def sparseMatrix_Tensor(self, X):
         """Convert a scipy sparse matrix to tf.SparseTensor.
         Returns:
             tf.SparseTensor: SparseTensor after conversion.
         """
+        ## coo - scipy matrix in the coordinate format. coo_matrix((data, (i, j)), [shape=(M, N)])
         coo = X.tocoo().astype(np.float32)
         indices = np.mat([coo.row, coo.col]).transpose()
         return tf.SparseTensor(indices, coo.data, coo.shape)
@@ -205,7 +190,7 @@ class LightGCN(object):
             for idx in range(n_batch):
                 users, pos_items, neg_items = self.data.train_loader(self.batch_size)
                 _, batch_loss, batch_mf_loss, batch_emb_loss = self.sess.run(
-                    [self.opt, self.loss, self.mf_loss, self.emb_loss],
+                    [self.optimizer, self.loss, self.mf_loss, self.emb_loss],
                     feed_dict={
                         self.users: users,
                         self.pos_items: pos_items,
@@ -384,8 +369,8 @@ class LightGCN(object):
         data = self.data
 
         self.output_embeddings(
-            data.id2user, self.n_users, self.ua_embeddings, user_file
+            data.id2user, self.n_users, self.average_user_embeddings, user_file
         )
         self.output_embeddings(
-            data.id2item, self.n_items, self.ia_embeddings, item_file
+            data.id2item, self.n_items, self.average_item_embeddings, item_file
         )
