@@ -42,6 +42,7 @@ def get_top_rated_movies_from_user(id):
     return entire_df
 def get_recommendations(id):
     entire_df= prediction_df[prediction_df["userID"]==id].sort_values(by="prediction", ascending=False).head(10)
+    entire_df.drop(columns=["Unnamed: 0"], inplace=True)
     return entire_df
 
 def update_user(id):
@@ -93,7 +94,7 @@ with demo:
 
   gr.Markdown("""
   <p style='text-align: center'>
-      <a href='https://keras.io/examples/structured_data/collaborative_filtering_movielens/' target='_blank' style='text-decoration: underline'>Keras Example by Siddhartha Banerjee</a>
+      <a href='https://keras.io/examples/structured_data/collaborative_filtering_movielens/' target='_blank' style='text-decoration: underline'></a>
       <br>
       Space by Scott Krstyen (mindwrapped)
       </p>
