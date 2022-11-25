@@ -7,3 +7,5 @@ Team Members: Prateek Chanda (22D0362), Sandarbh Yadav (22D0374), Jimut Bahan Pa
 Course: CS725 - Foundations of Machine Learning
 
 Instructor: [Preethi Jyothi](https://www.cse.iitb.ac.in/~pjyothi/)
+
+![](fml.mp4)
