@@ -11,3 +11,9 @@ Instructor: [Preethi Jyothi](https://www.cse.iitb.ac.in/~pjyothi/)
 Demo using Gradio:
 
 ![](fml_gradio.gif)
+
+Instructions for running the code:
+
+1. Install tensorflow, numpy, pandas etc.
+2. Clone the repository
+3. Run mainSol.py using command: python mainSol.py
