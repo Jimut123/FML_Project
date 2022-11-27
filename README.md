@@ -8,5 +8,6 @@ Course: CS725 - Foundations of Machine Learning
 
 Instructor: [Preethi Jyothi](https://www.cse.iitb.ac.in/~pjyothi/)
 
+Demo using Gradio:
 
 ![](fml_gradio.gif)
