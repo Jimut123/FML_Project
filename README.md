@@ -4,7 +4,7 @@ Topic: Solving the Cold Start problem in Recommendation Systems - Case Study on 
 
 Team Members: Prateek Chanda (22D0362), Sandarbh Yadav (22D0374), Jimut Bahan Pal (22D1594) and Goda Nagakalyani (214050010)
 
-Course: CS725 - Foundations of Machine Learning
+Course: CS725 - Foundations of Machine Learning, IIT Bombay
 
 Instructor: [Preethi Jyothi](https://www.cse.iitb.ac.in/~pjyothi/)
 
