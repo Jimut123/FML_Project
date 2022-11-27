@@ -12,8 +12,12 @@ Demo using Gradio:
 
 ![](fml_gradio.gif)
 
+Gradio demonstration links: [MovieLens Dataset Analysis](https://fmlprojectcs725-movielensdatasetanalysis.hf.space/) & [MovieLens Final Top K recommendations](https://fmlprojectcs725-recommendationmovielens.hf.space/)
+
 Instructions for running the code:
 
 1. Install tensorflow, numpy, pandas etc.
 2. Clone the repository
 3. Run mainSol.py using command: python mainSol.py
+
+Note: LightGCN.py contains the implementation of LightGCN model and recommendation.py contains the gradio code for making recommendations.
