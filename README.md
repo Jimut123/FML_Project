@@ -10,7 +10,10 @@ Instructor: [Preethi Jyothi](https://www.cse.iitb.ac.in/~pjyothi/)
 
 Demo using Gradio:
 
-![](fml_gradio.gif)
+<p align="center">
+  <img src="fml_gradio.gif" />
+</p>
+
 
 Gradio demonstration links: [MovieLens Dataset Analysis](https://fmlprojectcs725-movielensdatasetanalysis.hf.space/) & [MovieLens Final Top K recommendations](https://fmlprojectcs725-recommendationmovielens.hf.space/)
 
