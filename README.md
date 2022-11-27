@@ -1,4 +1,4 @@
-# CS-275 Foundations of Machine Learning, Project, IIT Bombay
+# CS-275 Foundations of Machine Learning Project, IIT Bombay
 ***
 
 ### Topic: **Solving the Cold Start problem in Recommendation Systems - Case Study on MovieLens Dataset**
