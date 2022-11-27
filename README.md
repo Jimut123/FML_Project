@@ -1,10 +1,10 @@
-# FML Project
+# CS-275 Foundations of Machine Learning, Project, IIT Bombay
+***
 
-Topic: Solving the Cold Start problem in Recommendation Systems - Case Study on MovieLens Dataset
+### Topic: **Solving the Cold Start problem in Recommendation Systems - Case Study on MovieLens Dataset**
 
-Team Members: Prateek Chanda (22D0362), Sandarbh Yadav (22D0374), Jimut Bahan Pal (22D1594) and Goda Nagakalyani (214050010)
+### Team Members: **Prateek Chanda (22D0362), Sandarbh Yadav (22D0374), Jimut Bahan Pal (22D1594) and Goda Nagakalyani (214050010)**
 
-Course: CS725 - Foundations of Machine Learning, IIT Bombay
 
 Instructor: [Preethi Jyothi](https://www.cse.iitb.ac.in/~pjyothi/)
 
@@ -24,3 +24,5 @@ Instructions for running the code:
 3. Run mainSol.py using command: python mainSol.py
 
 Note: LightGCN.py contains the implementation of LightGCN model and recommendation.py contains the gradio code for making recommendations.
+
+***
