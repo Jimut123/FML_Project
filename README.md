@@ -28,6 +28,7 @@ To run lightGCN++, in mainSol, pass argument defaultMode=False, else to run Ligh
 Note: LightGCN.py contains the implementation of LightGCN model and recommendation.py contains the gradio code for making recommendations.
 
 Code for HuggingSpace Deployments
+
 [Top K recommendation code HuggingSpace](https://huggingface.co/spaces/FMLProjectCS725/recommendationMovieLens)
 
 [Movielens Dataset analysis code HuggingSpace](https://huggingface.co/spaces/FMLProjectCS725/MovieLensDatasetAnalysis)
