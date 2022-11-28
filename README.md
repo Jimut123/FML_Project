@@ -23,6 +23,8 @@ Instructions for running the code:
 2. Clone the repository
 3. Run mainSol.py using command: python mainSol.py
 
+To run lightGCN++, in mainSol, pass argument defaultMode=False, else to run LightGCN, pass argument defaultMode=True
+
 Note: LightGCN.py contains the implementation of LightGCN model and recommendation.py contains the gradio code for making recommendations.
 
 ***
