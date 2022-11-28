@@ -5,9 +5,10 @@ import os
 import sys
 import numpy as np
 import pandas as pd
-from evaluation.map import map_at_k
-from evaluation.ndcg import ndcg_at_k
-from evaluation.precision import precision_at_k
+from metrics.map import map_at_k
+from metrics.ndcg import ndcg_at_k
+from metrics.precision import precision_at_k
+from metrics.recall import recall_at_k
 from utilities import get_top_k_scored_items
 
 
@@ -22,7 +23,7 @@ class LightGCN(object):
         preprint arXiv:2002.02126, 2020.
     """
 
-    def __init__(self, hparams, data, seed=None):
+    def __init__(self, hparams, data, defaultMode , seed=None):
         """Initializing the model. Create parameters, placeholders, embeddings and loss function.
         Args:
             hparams (HParams): A HParams object, hold the entire set of hyperparameters.
@@ -33,6 +34,8 @@ class LightGCN(object):
         tf.compat.v1.set_random_seed(seed)
         np.random.seed(seed)
 
+        self.defaultMode = defaultMode
+        self.alpha = 0.5
         self.data = data
         self.epochs = hparams["epochs"]
         self.learning_rate = hparams["learning_rate"]
@@ -130,14 +133,30 @@ class LightGCN(object):
         )
         all_embeddings = [ego_embeddings]
 
-        for k in range(0, self.n_layers):
-            ego_embeddings = tf.sparse.sparse_dense_matmul(A_hat, ego_embeddings)
-            all_embeddings += [ego_embeddings]
+        if(self.defaultMode):
+            print("Default mode - LightGCN is running")
+            for k in range(0, self.n_layers):
+                ego_embeddings = tf.sparse.sparse_dense_matmul(A_hat, ego_embeddings)
+                all_embeddings += [ego_embeddings]
+                print(all_embeddings)
+            all_embeddings = tf.stack(all_embeddings, 1)
+            all_embeddings = tf.reduce_mean(
+                input_tensor=all_embeddings, axis=1, keepdims=False
+            )
+        else:
+            print("LightGCN++ is running")
 
-        all_embeddings = tf.stack(all_embeddings, 1)
-        all_embeddings = tf.reduce_mean(
-            input_tensor=all_embeddings, axis=1, keepdims=False
-        )
+            for k in range(0, self.n_layers):
+                ego_embeddings = tf.sparse.sparse_dense_matmul(A_hat, ego_embeddings)
+                ego_embeddings = tf.math.scalar_mul((self.alpha**(self.n_layers-1 -k)),ego_embeddings)
+                all_embeddings += [ego_embeddings]
+                print(all_embeddings)
+            all_embeddings = tf.stack(all_embeddings, 1)
+            all_embeddings = tf.reduce_mean(
+                input_tensor=all_embeddings, axis=1, keepdims=False
+            )
+
+       
         u_g_embeddings, i_g_embeddings = tf.split(
             all_embeddings, [self.n_users, self.n_items], 0
         )
@@ -209,7 +228,7 @@ class LightGCN(object):
             
             if self.eval_epoch == -1 or epoch % self.eval_epoch != 0:
                 print(
-                    "Epoch %d (train)%.1fs: train loss = %.5f = (mf)%.5f + (embed)%.5f"
+                    "Epoch %d (train)%.1fs: train loss = %.5f = (matrix factorization)%.5f + (embedding)%.5f"
                     % (epoch, train_time, loss, mf_loss, emb_loss)
                 )
             else:
@@ -219,7 +238,7 @@ class LightGCN(object):
                 eval_time = eval_end - eval_start
 
                 print(
-                    "Epoch %d (train)%.1fs + (eval)%.1fs: train loss = %.5f = (mf)%.5f + (embed)%.5f, %s"
+                    "Epoch %d (train)%.1fs + (eval)%.1fs: train loss = %.5f = (matrix factorization)%.5f + (embedding)%.5f, %s"
                     % (
                         epoch,
                         train_time,
@@ -262,16 +281,15 @@ class LightGCN(object):
                         self.data.test, topk_scores, k=self.top_k
                     )
                 )
-           
-        return ret
-        """
- elif metric == "recall":
+            elif metric == "recall":
                 ret.append(
                     recall_at_k(
                         self.data.test, topk_scores, k=self.top_k
                     )
                 )
-"""
+           
+        return ret
+     
 
 
     def score(self, user_ids, remove_seen=True):

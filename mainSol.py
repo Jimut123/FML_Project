@@ -7,15 +7,12 @@ from dataModel import ImplicitCF
 
 df = pd.read_csv(r"ml-100k\ml-100k\u.data", sep="\t", names=["userID", "itemID", "rating", "timestamp"])    
     
-print(df["rating"].head(20))
 
 rating_df = df[df["rating"]>=1.0]
     # Split the dataset
 
 df_train, df_test = train_test_split(rating_df, test_size
                                =0.25)
-
-print(df_train)
 
 
 def prepare_training_lightgcn(train, test):
@@ -35,7 +32,9 @@ params ={'n_layers': 3,
 
 def train_lightgcn(params, data):
     hparams = params
-    model = LightGCN(hparams, data)
+    # defaultMode = true (Orignial LightGCN model)
+    # defaultMode = false (LightGCN++ model)
+    model = LightGCN(hparams, data, defaultMode= False)
     with tqdm() as t:
         model.fit()
     return model, t
