@@ -5,7 +5,6 @@ import pandas as pd
 import scipy.sparse as sp
 
 
-
 class ImplicitCF(object):
     """Data processing class for our model which use implicit feedback.
     Initialize train and test set, create normalized adjacency matrix and sample data for training epochs.
@@ -58,6 +57,7 @@ class ImplicitCF(object):
         df = train if test is None else pd.concat([train, test],axis=0,ignore_index=True)
 
 
+        
 ## This can be done in one single function
         if self.user_idx is None:
             user_idx = df[[self.col_user]].drop_duplicates().reindex()
@@ -90,6 +90,7 @@ class ImplicitCF(object):
 
         return self._reindex(train), self._reindex(test)
 
+    
     def _reindex(self, df):
         """Process the dataset to reindex userID and itemID and only keep records with ratings greater than 0.
         Args:
