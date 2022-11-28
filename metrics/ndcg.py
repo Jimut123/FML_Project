@@ -1,5 +1,5 @@
 import numpy as np
-from evaluation.evaluation import merge_ranking_true_pred
+from metrics.evaluation import merge_ranking_true_pred
 
 
 def ndcg_at_k(
@@ -8,7 +8,6 @@ def ndcg_at_k(
     col_user="userID",
     col_item="itemID",
     col_prediction="prediction",
-    relevancy_method="top_k",
     k=10,
     threshold=10,
     **kwargs
@@ -22,8 +21,6 @@ def ndcg_at_k(
         col_item (str): column name for item
         col_rating (str): column name for rating
         col_prediction (str): column name for prediction
-        relevancy_method (str): method for determining relevancy ['top_k', 'by_threshold', None]. None means that the
-            top k items are directly provided, so there is no need to compute the relevancy operation.
         k (int): number of top k items per user
         threshold (float): threshold of top items per user (optional)
     Returns:
